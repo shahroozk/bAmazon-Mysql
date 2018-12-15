@@ -25,36 +25,85 @@ connection.connect(function(err) {
 
       // for (var i = 0; i < res.length; i++) {
         console.log("-----------------------------------------------------------------------------------------");
-      // console.log("ID: " + res[i].item_id + " | "+ "Product: " + res[i].product_name + " | " + "Department: " + res[i].department_name + " | " + "Price: "+ res[i].price + " | "  + "Quantity: " + res[i].stock_quantity );
+      // console.log("ID: " + res[0].item_id + " | "+ "Product: " + res[0].product_name + " | " + "Department: " + res[0].department_name + " | " + "Price: "+ res[0].price + " | "  + "Quantity: " + res[0].stock_quantity );
       console.table(res);
-      connection.end();
-      choosItem(res);
+      
+      buyProduct();
     // }
     });
     // console.log(query.sql);
   }
 
-  // function handel customer sgopping:
-  function choosItem(){
+  // function handel customer shopping:
+  function buyProduct(){
     inquirer
     .prompt([
       {
         type: "input",
-        name:"product",
+        name:"item_id",
         message: "Please enter the ID number of the item you would like to purchase.",
-         filter: Number
+        
       },
       {
-        name:"stock_quantity",
+        name:"quantity",
         type:"input",
         message:"How many units of this item would you like to purchase?",
-         filter: Number
+        
       }
 
-    ])
+    ]).then(function(answer) {
+      
+      connection.query("SELECT * FROM products WHERE ?", { item_id: answer.item_id}, function(err, res){
+          var productData = res[0].stock_quantity
+          var updateStock = productData - parseInt(answer.quantity);
+          if (updateStock >=0) {
+          //  console.log(updateStock);
+          console.log("----------------------------------------------------");
+          console.log("you are ordered: " + answer.quantity + " " + "'" + res[0].product_name+"'");
+          console.log("---------------------------------------------");
+          
+          console.log("Your oder has been placed and Your total is $" + answer.quantity * res[0].price );
+          console.log("-------------------------------------------------------------");
+          
+      
+          
+      
+  
+      
+      var queryUpdate = connection.query(
+          "UPDATE products SET ? WHERE ?",
+          [
+              {
+                  stock_quantity: updateStock
+              },
+              {
+                item_id: answer.item_id
+              }
+          ],
+          function(err, res) {
+              if (err) throw err;
+               console.log(res.affectedRows + " Inventory updated!\n");
+              
+              
+          }
+      )
+      } else {
+        console.log(" ")
+        console.log("***************************************************");  
+        console.log("Sorry this product is out of stock!");
+          
+      }
+      
+      
+     connection.end()
+  })
+   
+  
+  })
+  }
     
       
     
     
-  } 
+  
 
