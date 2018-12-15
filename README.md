@@ -12,7 +12,7 @@
 - Mysql
 - inquirer NPM package.
 
-##Running the App
+## Running the App
 You can run this app by using any of the following command: 
 ```
 node bamazonCustomer.js
